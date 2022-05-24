@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-import { List } from "react-virtualized"
+import { List, AutoSizer } from "react-virtualized"
 import './App.css';
 
 const App = () => {
@@ -7,7 +7,7 @@ const App = () => {
   const [time, setTime] = useState(new Date);
 
   useEffect(() => {
-    setData([...Array(100).keys()]);
+    setData([...Array(1000).keys()]);
   }, []);
 
 
@@ -20,22 +20,25 @@ const App = () => {
   }, []);
 
   return (
-    <div>
-      <div>hello from me</div>
+    <div style={{ height: "100vh", width: "100%" }}>
       <h2>{time.toISOString()}</h2>
-      <List
-        width={600}
-        height={600}
-        rowHeight={60}
-        rowCount={data.length}
-        rowRenderer={
-          ({ key, index, style }) => {
-            return <p key={key} style={style}>the index from the data is {index}</p>
-          }
-        }
-      />
+      <AutoSizer>
+        {({ height,width}) => (
+          <List
+            width={height}
+            height={width}
+            rowHeight={60}
+            rowCount={data.length}
+            rowRenderer={
+              ({ key, index, style }) => {
+                return <p key={key} style={style}>the index from the data is {index}</p>
+              }
+            }
+          />
+        )}
 
 
+      </AutoSizer>
     </div>
   );
 }
