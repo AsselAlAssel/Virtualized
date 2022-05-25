@@ -1,13 +1,29 @@
-import React, { useEffect, useState } from "react"
-import { List, AutoSizer } from "react-virtualized"
+import React, { useEffect, useState, useRef } from "react"
+import { List, AutoSizer, CellMeasurer, CellMeasurerCache } from "react-virtualized"
+import { faker } from '@faker-js/faker';
+
 import './App.css';
 
 const App = () => {
-  const [data, setData] = useState([]);
+  const cache = useRef(
+    new CellMeasurerCache({
+      fixedWidth: true,
+      defaultHeight: 40
+    })
+  )
+  const [persons, setPersons] = useState([]);
   const [time, setTime] = useState(new Date);
 
   useEffect(() => {
-    setData([...Array(1000).keys()]);
+    setPersons([...Array(1000).keys()].map((element) => {
+      return {
+        id: element,
+        name: faker.name.firstName() + " " + faker.name.lastName(),
+        animal: faker.animal.bird(),
+        bio: faker.lorem.lines(Math.random() * 100)
+
+      }
+    }));
   }, []);
 
 
@@ -20,18 +36,30 @@ const App = () => {
   }, []);
 
   return (
-    <div style={{ height: "100vh", width: "100%" }}>
+    <div style={{ width:"100%",height:"100vh"}}>
       <h2>{time.toISOString()}</h2>
       <AutoSizer>
-        {({ height,width}) => (
+        {({ width,height }) => (
           <List
             width={height}
             height={width}
-            rowHeight={60}
-            rowCount={data.length}
+            rowHeight={cache.current.rowHeight}
+            deferredMeasurementCache={cache.current}
+            rowCount={persons.length}
             rowRenderer={
-              ({ key, index, style }) => {
-                return <p key={key} style={style}>the index from the data is {index}</p>
+              ({ key, index, style, parent }) => {
+                const person = persons[index];
+
+                return (
+                  <CellMeasurer key={key} cache={cache.current} parent={parent} columnIndex={0} rowIndex={index}>
+                    <div style={style} >
+
+
+                      <p >the name is {person.name}</p>
+                      <p>{person.bio}</p>
+                    </div>
+                  </CellMeasurer>
+                )
               }
             }
           />
